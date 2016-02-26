@@ -1,0 +1,114 @@
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.InputStream;
+import jxl.Cell;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.write.Label;
+import jxl.write.WritableSheet;
+
+/**
+ * PROJECT_NAME:    ExcelOperater
+ * PACKAGE_NAME:    PACKAGE_NAME
+ * Created by    faker
+ * DATE:    16-2-23
+ * TIME:    下午9:32
+ */
+
+public class ExcelOperater
+{
+    static String[][] CpExcel = new String[200][200];
+    static String[] ClASS_NAME = new String[50];
+
+    public static void main(String[] args) {
+        jxl.Workbook readwb = null;
+        try {
+            //构建Workbook对象, 只读Workbook对象
+            //直接从本地文件创建Workbook
+            InputStream instream = new FileInputStream("C:/Users/Hacker/Desktop/红楼梦11.xls");
+            readwb = Workbook.getWorkbook(instream);
+
+            //Sheet的下标是从0开始
+            //获取第一张Sheet表
+            Sheet readsheet = readwb.getSheet(0);
+            //获取Sheet表中所包含的总列数
+            int rsColumns = readsheet.getColumns();
+
+            //获取Sheet表中所包含的总行数
+            int rsRows = readsheet.getRows();
+            ClASS_NAME[0]="姓名";
+            ClASS_NAME[1]="学号";
+            for (int i = 0; i < 11; i++) {
+                Cell cell = readsheet.getCell(2, i + 1);
+                ClASS_NAME[i+2] = cell.getContents();
+            }
+            //获取指定单元格的对象引用
+            for (int i = 0; i < rsRows; i++) {
+                for (int j = 0; j < rsColumns; j++) {
+                    Cell cell = readsheet.getCell(j, i);
+                    CpExcel[i][j] = cell.getContents();
+                    System.out.print(CpExcel[i][j] + " ");
+                }
+                System.out.println();
+            }
+            readwb.close();
+
+            //利用已经创建的Excel工作薄,创建新的可写入的Excel工作薄
+            jxl.write.WritableWorkbook wwb = Workbook.createWorkbook(new File(
+                    "C:/Users/Hacker/Desktop/红楼梦1.xls"));
+            WritableSheet ws = wwb.createSheet("number1", 0);
+            if (wwb != null) {
+                String temp = "宝宝心里苦";
+                // 在工作簿里创建可写入的工作表，第一个参数为工作表名，第二个参数为该工作表的所在位置
+                if (ws != null) {
+                    /* 添加表结构 */
+                    // 行
+                    for (int i = 0; i < 50; i++) {
+                        // 列
+                        for (int j = 0; j < 15; j++) {
+                            if (i == 0) {
+                                Label label = new Label(j, i, ClASS_NAME[j]);
+                                ws.addCell(label);
+                            } else {
+                                // Label构造器中有三个参数，第一个为列，第二个为行，第三个则为单元格填充的内容
+                                Label label = new Label(j, i, temp);
+                                // 将被写入数据的单元格添加到 工作表
+                                ws.addCell(label);
+                            }
+                        }
+                    }
+                }
+            }
+                //写成绩
+                int count = 0;
+                int i=0,j=0,k=0;
+
+                for(i=1; i<=16; i++) {
+                    for(k=2; k<=12; k++){
+                        for (j = 1; j <= 11; j++) {
+                            Cell NEW_CELL = ws.getCell(k, 0);
+                            String New_Cell = NEW_CELL.getContents();
+                            if (New_Cell.equals(CpExcel[j + count * 11][2])) {
+                                Label label = new Label(k, i, CpExcel[j + count * 11][3]);
+                                ws.addCell(label);
+                            }
+                        }
+                    }
+                    Label label = new Label(0, i, CpExcel[j+count*11-1][0]);
+                    ws.addCell(label);
+                    Label label2 = new Label(1, i, CpExcel[j + count * 11-1][1]);
+                    ws.addCell(label2);
+                    count++;
+                }
+
+                //写入Excel对象
+                wwb.write();
+                wwb.close();
+            }catch(Exception e){
+                e.printStackTrace();
+            }finally{
+                readwb.close();
+            }
+        }
+
+    }
